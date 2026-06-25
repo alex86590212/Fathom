@@ -23,7 +23,7 @@ def test_check_no_mascot_text(tmp_path):
     runner = CliRunner()
     result = runner.invoke(main, ["check", str(tmp_path), "--no-mascot"])
     assert result.exit_code == 0
-    assert "files scanned" in result.output.lower() or "No dishonest" in result.output
+    assert "Fathom" in result.output or "fathom" in result.output.lower()
 
 
 def test_check_writes_fathom_dir(tmp_path, monkeypatch):

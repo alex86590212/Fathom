@@ -9,14 +9,13 @@ from pathlib import Path
 
 import click
 from rich.console import Console
-from rich.table import Table
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
 from fathom.comprehension import score_file
+from fathom.display import print_report, print_score, print_watch_diff, print_watch_header
 from fathom.phantom import animate, should_show_mascot
 from fathom.report import build_report, format_markdown, save_report
-from fathom.test_honesty import analyze_directory
 
 console = Console()
 stderr_console = Console(file=sys.stderr)
@@ -31,46 +30,10 @@ def _resolve_coverage(path: Path, coverage: Path | None) -> Path | None:
     return None
 
 
-def _print_text_report(report_dict: dict) -> None:
-    summary = report_dict.get("summary", {})
-    parts = [f"{report_dict['files_scanned']} files scanned"]
-    for zone in ("critical", "fragile", "blind_spot", "healthy"):
-        if summary.get(zone, 0):
-            parts.append(f"{summary[zone]} {zone}")
-    console.print("[bold]" + " · ".join(parts) + "[/bold]")
-
-    if report_dict.get("files"):
-        table = Table(title="Risk by file")
-        table.add_column("File")
-        table.add_column("Zone")
-        table.add_column("Honesty", justify="right")
-        table.add_column("Comprehension", justify="right")
-        for fr in report_dict["files"]:
-            table.add_row(
-                Path(fr["path"]).name,
-                fr["risk_zone"],
-                f"{fr['test_honesty_score']:.0f}",
-                f"{fr['comprehension_score']:.0f}",
-            )
-        console.print(table)
-
-    findings = report_dict.get("findings", [])
-    if not findings:
-        console.print("[green]No dishonest test patterns detected.[/green]")
-    else:
-        console.print(f"\n[yellow]{len(findings)} finding(s):[/yellow]")
-        for finding in findings:
-            file_name = Path(finding["file"]).name
-            console.print(
-                f"  • {file_name}:{finding['line']} — "
-                f"[bold]{finding['pattern']}[/bold]: {finding.get('message', '')}"
-            )
-
-
 @click.group()
-@click.version_option(package_name="fathom-analyzer")
+@click.version_option(package_name="fathom-analyzer", prog_name="fathom")
 def main() -> None:
-    """Fathom — code comprehension risk visualization."""
+    """Fathom — see which tests you trust and which code you understand."""
 
 
 @main.command()
@@ -88,7 +51,7 @@ def check(
     no_mascot: bool,
     no_git: bool,
 ) -> None:
-    """Analyze test honesty for Python tests under PATH."""
+    """Analyze test honesty under PATH and map files to the risk matrix."""
     coverage_path = _resolve_coverage(path, coverage)
     show_mascot = should_show_mascot(output_format=output_format, no_mascot=no_mascot)
 
@@ -106,8 +69,9 @@ def check(
     else:
         report = run_build()
 
+    saved = None
     if not no_save and output_format != "json":
-        save_report(report)
+        saved = save_report(report)
 
     report_dict = report.to_dict()
 
@@ -116,7 +80,9 @@ def check(
     elif output_format == "markdown":
         sys.stdout.write(format_markdown(report) + "\n")
     else:
-        _print_text_report(report_dict)
+        print_report(console, report_dict, path=str(path.resolve()))
+        if saved is not None:
+            console.print(f"[dim]Saved → {saved}[/dim]\n")
 
     sys.exit(0)
 
@@ -125,7 +91,7 @@ def check(
 @click.argument("file", type=click.Path(exists=True, path_type=Path))
 @click.option("--format", "output_format", type=click.Choice(["text", "json"]), default="text")
 def score(file: Path, output_format: str) -> None:
-    """Score a single file's comprehension from git origin."""
+    """Show git-derived comprehension score for a single file."""
     comp = score_file(file)
     data = {
         "path": str(file),
@@ -136,7 +102,7 @@ def score(file: Path, output_format: str) -> None:
     if output_format == "json":
         sys.stdout.write(json.dumps(data, indent=2) + "\n")
     else:
-        console.print(f"{file.name}: {comp.score:.0f} ({comp.origin.value})")
+        print_score(console, file, comp.score, comp.origin.value)
     sys.exit(0)
 
 
@@ -182,19 +148,13 @@ class _TestWatchHandler(FileSystemEventHandler):
             report = run_build()
 
         save_report(report)
-        current = {
-            (f["file"], f["line"], f["pattern"]) for f in report.findings
-        }
+        current = {(f["file"], f["line"], f["pattern"]) for f in report.findings}
         new = current - self._last_findings
         resolved = self._last_findings - current
         self._last_findings = current
 
-        console.print(f"\n[dim]{time.strftime('%H:%M:%S')}[/dim] — check complete")
-        if new:
-            console.print(f"[red]+{len(new)} new finding(s)[/red]")
-        if resolved:
-            console.print(f"[green]-{len(resolved)} resolved[/green]")
-        _print_text_report(report.to_dict())
+        print_watch_diff(console, new=new, resolved=resolved)
+        print_report(console, report.to_dict(), path=str(self._path.resolve()))
 
 
 @main.command()
@@ -203,21 +163,23 @@ class _TestWatchHandler(FileSystemEventHandler):
 @click.option("--no-mascot", is_flag=True)
 @click.option("--no-git", is_flag=True)
 def watch(path: Path, coverage: Path | None, no_mascot: bool, no_git: bool) -> None:
-    """Watch PATH and re-run analysis on test file changes."""
+    """Re-run analysis whenever a test file changes."""
     coverage_path = _resolve_coverage(path, coverage)
     handler = _TestWatchHandler(path, coverage_path, no_git, no_mascot)
+
+    watch_path = str(path.resolve() if path.is_dir() else path.parent.resolve())
+    print_watch_header(console, watch_path)
     handler._run_check()
 
     observer = Observer()
-    watch_path = str(path if path.is_dir() else path.parent)
     observer.schedule(handler, watch_path, recursive=True)
     observer.start()
-    console.print(f"[dim]Watching {watch_path} (Ctrl+C to stop)…[/dim]")
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         observer.stop()
+        console.print("\n[dim]Watch stopped.[/]")
     observer.join()
 
 
