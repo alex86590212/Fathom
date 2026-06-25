@@ -1,0 +1,51 @@
+{
+  "name": "fathom",
+  "displayName": "Fathom",
+  "description": "Code comprehension risk visualization — 2×2 risk matrix heatmap",
+  "version": "0.1.0",
+  "publisher": "fathom",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other", "Linters"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "fathom.check",
+        "title": "Fathom: Check Test Honesty"
+      },
+      {
+        "command": "fathom.showMatrix",
+        "title": "Fathom: Show Risk Matrix"
+      }
+    ],
+    "configuration": {
+      "title": "Fathom",
+      "properties": {
+        "fathom.claudeApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Claude API key for on-demand red-zone explanations (optional)"
+        },
+        "fathom.dataDir": {
+          "type": "string",
+          "default": ".fathom",
+          "description": "Local per-developer data directory (gitignored)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.0"
+  }
+}

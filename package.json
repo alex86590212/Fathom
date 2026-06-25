@@ -1,0 +1,16 @@
+{
+  "name": "fathom",
+  "private": true,
+  "description": "Code comprehension risk visualization",
+  "workspaces": [
+    "packages/vscode",
+    "packages/github-action"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

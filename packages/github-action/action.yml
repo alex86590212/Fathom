@@ -1,0 +1,52 @@
+name: Fathom
+description: Comment-only PR risk report from test honesty analysis
+author: Fathom
+
+inputs:
+  path:
+    description: Path to analyze (default tests/)
+    required: false
+    default: tests/
+  python-version:
+    description: Python version for fathom analyzer
+    required: false
+    default: "3.11"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install Fathom analyzer
+      shell: bash
+      run: pip install -e "${{ github.action_path }}/../analyzer"
+
+    - name: Run Fathom check
+      id: fathom
+      shell: bash
+      run: |
+        fathom check "${{ inputs.path }}" --format json > /tmp/fathom-results.json || true
+        echo "results=$(cat /tmp/fathom-results.json)" >> "$GITHUB_OUTPUT"
+
+    - name: Post PR comment
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          // TODO: format risk matrix as markdown comment
+          // Comment-only — never fails the check (fail_on deferred)
+          const results = JSON.parse('${{ steps.fathom.outputs.results }}');
+          const body = `## Fathom Risk Report\n\n*${results.files_scanned} test file(s) scanned, ${results.findings.length} finding(s)*\n\n_Comment-only mode — does not block merge._`;
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body,
+          });
+
+branding:
+  icon: radar
+  color: green

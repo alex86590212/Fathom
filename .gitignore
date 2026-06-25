@@ -1,0 +1,32 @@
+# Fathom local state (per-developer, never committed)
+.fathom/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node / VS Code extension
+node_modules/
+out/
+*.vsix
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Env secrets (Claude API key for explainer)
+.env
+.env.local
