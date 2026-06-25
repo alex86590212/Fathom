@@ -26,9 +26,13 @@ Phase 4 adds local behavioral signals (reading time, AI completion acceptance) o
 
 ### Test Honesty (X-axis)
 
-Four anti-patterns detected via AST analysis:
+Start at **100**. Each finding deducts points and caps the score at **49** — any detected pattern means the file is on the low-honesty side of the matrix.
 
-1. **Internal module mocking** — mocking your own code, not external APIs
-2. **Tautological assertions** — `expect(mockFn()).toBe(mockFn())`
-3. **No failure path** — assertions that always resolve true
-4. **Mocked coverage** — line runs but real behavior untested
+| Pattern | Penalty |
+|---------|---------|
+| `internal_module_mock` | −55 |
+| `mocked_coverage` | −60 |
+| `tautological_assertion` | −50 |
+| `no_failure_path` | −35 |
+
+Threshold: **50** — scores below 50 (or any finding) = low test honesty.

@@ -13,7 +13,7 @@ from fathom.risk_matrix import RiskZone, classify
 from fathom.test_honesty.discovery import discover_test_files
 from fathom.test_honesty.analyzers import analyze_file
 from fathom.test_honesty.coverage_data import load_coverage
-from fathom.test_honesty.scoring import honesty_score
+from fathom.test_honesty.scoring import honesty_score, is_low_honesty
 
 ProgressCallback = Callable[[str], None]
 
