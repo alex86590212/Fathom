@@ -45,6 +45,36 @@ def test_external(mock_get):
     assert hits == []
 
 
+def test_internal_module_mock_finds_patch_object():
+    source = """
+from unittest.mock import patch
+import demo_app
+
+def test_x():
+    with patch.object(demo_app, "add", return_value=5):
+        assert demo_app.add(2, 3) == 5
+"""
+    tree = ast.parse(source)
+    hits = InternalModuleMockPattern().detect(tree, source)
+    assert len(hits) == 1
+    assert "demo_app.add" in hits[0].message
+
+
+def test_internal_module_mock_finds_patch_multiple():
+    source = """
+from unittest.mock import patch
+from demo_app import add
+
+@patch.multiple("demo_app", add=lambda *a: 5, multiply=lambda *a: 10)
+def test_x():
+    assert add(1, 2) == 5
+"""
+    tree = ast.parse(source)
+    hits = InternalModuleMockPattern().detect(tree, source)
+    assert len(hits) == 1
+    assert hits[0].message.startswith('Patching internal module "demo_app"')
+
+
 def test_internal_module_mock_finds_mocker_patch():
     source = """
 from demo_app import add

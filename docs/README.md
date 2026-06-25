@@ -6,6 +6,7 @@
 |-----|-------------|
 | [architecture.md](./architecture.md) | Three-layer architecture overview |
 | [risk-matrix.md](./risk-matrix.md) | The 2×2 comprehension × test honesty model |
+| [rules.md](./rules.md) | Free-tier detection rules (AST + git), thresholds, non-goals |
 | [phases.md](./phases.md) | Build sequence and current status |
 
 ## Design Decisions

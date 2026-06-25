@@ -9,6 +9,8 @@ Two axes. One output.
 
 Every file in your codebase lives in one of those four zones. Fathom's job is to show you where each file sits and move it toward green.
 
+Full rule definitions: [rules.md](./rules.md).
+
 ## Axes
 
 ### Comprehension (Y-axis)

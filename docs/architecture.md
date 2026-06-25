@@ -35,3 +35,7 @@ No telemetry. No team sync. No phone-home.
 ## Privacy
 
 The only external call is to the Claude API, and only when you explicitly hover over a red zone and ask for an explanation.
+
+## Free-tier rules
+
+Core scoring uses local AST + git rules only. See [rules.md](./rules.md) for pattern definitions, thresholds, penalties, and explicit non-goals.

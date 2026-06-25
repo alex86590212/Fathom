@@ -9,6 +9,18 @@ from typing import Any
 from fathom.test_honesty.patterns import TestHonestyPattern
 
 
+def _dedupe_findings(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[tuple[str, int, str]] = set()
+    unique: list[dict[str, Any]] = []
+    for item in findings:
+        key = (item["file"], item["line"], item["pattern"])
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(item)
+    return unique
+
+
 def analyze_file(
     file_path: Path,
     coverage_data: dict[str, Any] | None = None,
@@ -35,4 +47,4 @@ def analyze_file(
                 }
             )
 
-    return findings
+    return _dedupe_findings(findings)
