@@ -24,10 +24,15 @@
     "configuration": {
       "title": "Fathom",
       "properties": {
+        "fathom.analyzerPath": {
+          "type": "string",
+          "default": "fathom",
+          "description": "Path to fathom CLI executable"
+        },
         "fathom.claudeApiKey": {
           "type": "string",
           "default": "",
-          "description": "Claude API key for on-demand red-zone explanations (optional)"
+          "description": "Claude API key for on-demand red-zone explanations (Phase 4)"
         },
         "fathom.dataDir": {
           "type": "string",
@@ -35,13 +40,18 @@
           "description": "Local per-developer data directory (gitignored)"
         }
       }
+    },
+    "colors": {
+      "fathom.critical": "#e06c75",
+      "fathom.fragile": "#e5c07b",
+      "fathom.blindSpot": "#61afef",
+      "fathom.healthy": "#98c379"
     }
   },
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "vsce package",
-    "test": "node ./out/test/runTest.js"
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
-
-export type RiskZone = 'critical' | 'fragile' | 'blind_spot' | 'healthy';
+import type { FathomReport, RiskZone } from './analyzer';
 
 const ZONE_COLORS: Record<RiskZone, string> = {
   critical: 'fathom.critical',
@@ -9,30 +8,60 @@ const ZONE_COLORS: Record<RiskZone, string> = {
   healthy: 'fathom.healthy',
 };
 
-/**
- * Gutter decorations showing comprehension × test honesty risk zones.
- * Phase 3: heatmap from git history alone.
- * Phase 4: combined with behavioral tracking scores.
- */
 export class Heatmap implements vscode.Disposable {
   private decorationTypes = new Map<RiskZone, vscode.TextEditorDecorationType>();
+  private fileZones = new Map<string, RiskZone>();
 
   constructor() {
     for (const [zone, colorKey] of Object.entries(ZONE_COLORS)) {
       this.decorationTypes.set(
         zone as RiskZone,
         vscode.window.createTextEditorDecorationType({
-          gutterIconPath: undefined, // TODO: zone-specific gutter icons
+          backgroundColor: new vscode.ThemeColor(`${colorKey}33`),
           overviewRulerColor: new vscode.ThemeColor(colorKey),
-          overviewRulerLane: vscode.OverviewRulerLane.Right,
+          overviewRulerLane: vscode.OverviewRulerLane.Full,
+          isWholeLine: true,
         }),
       );
     }
   }
 
-  /** Apply risk zone decorations to the active editor. (Not yet implemented.) */
-  update(editor: vscode.TextEditor, zones: Map<number, RiskZone>): void {
-    // TODO: map line numbers to decoration types
+  updateFromReport(report: FathomReport): void {
+    this.fileZones.clear();
+    for (const file of report.files) {
+      this.fileZones.set(file.path, file.risk_zone);
+    }
+    this.refreshActiveEditor();
+  }
+
+  refreshActiveEditor(): void {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      return;
+    }
+    const zone = this.fileZones.get(editor.document.uri.fsPath);
+    if (!zone) {
+      this.clear(editor);
+      return;
+    }
+    const deco = this.decorationTypes.get(zone);
+    if (!deco) {
+      return;
+    }
+    const lineCount = editor.document.lineCount;
+    const range = new vscode.Range(0, 0, lineCount, 0);
+    editor.setDecorations(deco, [range]);
+    for (const [z, dt] of this.decorationTypes) {
+      if (z !== zone) {
+        editor.setDecorations(dt, []);
+      }
+    }
+  }
+
+  clear(editor: vscode.TextEditor): void {
+    for (const dt of this.decorationTypes.values()) {
+      editor.setDecorations(dt, []);
+    }
   }
 
   dispose(): void {

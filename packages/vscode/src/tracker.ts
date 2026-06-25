@@ -1,18 +1,13 @@
 import * as vscode from 'vscode';
 
 /**
- * Behavioral signal collection — per-developer, local only.
- *
- * Signals (Phase 4+):
- * - Active reading time (cursor in file, window focused, not idle)
- * - AI completion acceptance without edits
- * - Score decay as code changes
+ * Behavioral signal collection — per-developer, local only. (Phase 4)
  */
 export class Tracker implements vscode.Disposable {
   private disposables: vscode.Disposable[] = [];
 
   constructor(private readonly dataDir: string) {
-    // TODO: persist signals to {workspace}/.fathom/signals.json
+    // Phase 4: persist signals to {workspace}/.fathom/signals.json
   }
 
   dispose(): void {
