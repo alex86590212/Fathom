@@ -6,7 +6,7 @@ import {
   runScore,
   type FathomReport,
 } from './analyzer';
-import { Heatmap } from './heatmap';
+import { Heatmap, registerHoverProvider } from './heatmap';
 import { MatrixPanel } from './matrixPanel';
 import { persistReport } from './persist';
 
@@ -77,6 +77,8 @@ export function activate(context: vscode.ExtensionContext): void {
   heatmap = new Heatmap();
   statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   context.subscriptions.push(heatmap, statusBar);
+
+  registerHoverProvider(context, (filePath) => heatmap?.getFileReport(filePath));
 
   context.subscriptions.push(
     vscode.commands.registerCommand('fathom.check', () => runFullCheck(context)),

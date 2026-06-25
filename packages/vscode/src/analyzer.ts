@@ -1,4 +1,5 @@
 import { execFile } from 'child_process';
+import { existsSync } from 'fs';
 import { promisify } from 'util';
 import * as vscode from 'vscode';
 
@@ -34,12 +35,44 @@ export interface ScoreResult {
   origin: string;
 }
 
-function analyzerPath(): string {
-  return vscode.workspace.getConfiguration('fathom').get<string>('analyzerPath', 'fathom');
+interface AnalyzerCommand {
+  command: string;
+  prefixArgs: string[];
+}
+
+function resolveAnalyzerCommand(): AnalyzerCommand {
+  const config = vscode.workspace.getConfiguration('fathom');
+  const analyzerPath = config.get<string>('analyzerPath', '').trim();
+  const pythonPath = config.get<string>('pythonPath', 'python3').trim() || 'python3';
+
+  if (analyzerPath) {
+    return { command: analyzerPath, prefixArgs: [] };
+  }
+
+  return { command: pythonPath, prefixArgs: ['-m', 'fathom'] };
+}
+
+async function runFathom(args: string[]): Promise<string> {
+  const { command, prefixArgs } = resolveAnalyzerCommand();
+  try {
+    const { stdout } = await execFileAsync(command, [...prefixArgs, ...args], {
+      env: process.env,
+      maxBuffer: 10 * 1024 * 1024,
+    });
+    return stdout;
+  } catch (err) {
+    const hint = resolveAnalyzerCommand();
+    const tried = [hint.command, ...hint.prefixArgs].join(' ');
+    throw new Error(
+      `${err instanceof Error ? err.message : String(err)} (tried: ${tried}). ` +
+        'Set fathom.pythonPath or fathom.analyzerPath in settings. ' +
+        'Install CLI: pip install -e packages/analyzer',
+    );
+  }
 }
 
 export async function runCheck(testsPath: string): Promise<FathomReport> {
-  const { stdout } = await execFileAsync(analyzerPath(), [
+  const stdout = await runFathom([
     'check',
     testsPath,
     '--format',
@@ -51,12 +84,7 @@ export async function runCheck(testsPath: string): Promise<FathomReport> {
 }
 
 export async function runScore(filePath: string): Promise<ScoreResult> {
-  const { stdout } = await execFileAsync(analyzerPath(), [
-    'score',
-    filePath,
-    '--format',
-    'json',
-  ]);
+  const stdout = await runFathom(['score', filePath, '--format', 'json']);
   return JSON.parse(stdout) as ScoreResult;
 }
 
@@ -72,7 +100,9 @@ export function findTestsRoot(): string | undefined {
   }
   for (const folder of folders) {
     const tests = vscode.Uri.joinPath(folder.uri, 'tests');
-    return tests.fsPath;
+    if (existsSync(tests.fsPath)) {
+      return tests.fsPath;
+    }
   }
   return undefined;
 }

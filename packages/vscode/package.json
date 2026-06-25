@@ -26,8 +26,13 @@
       "properties": {
         "fathom.analyzerPath": {
           "type": "string",
-          "default": "fathom",
-          "description": "Path to fathom CLI executable"
+          "default": "",
+          "description": "Full path to fathom CLI. Leave empty to use python -m fathom."
+        },
+        "fathom.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "Python executable for python -m fathom when analyzerPath is empty"
         },
         "fathom.claudeApiKey": {
           "type": "string",
@@ -41,18 +46,35 @@
         }
       }
     },
-    "colors": {
-      "fathom.critical": "#e06c75",
-      "fathom.fragile": "#e5c07b",
-      "fathom.blindSpot": "#61afef",
-      "fathom.healthy": "#98c379"
-    }
+    "colors": [
+      {
+        "id": "fathom.critical",
+        "description": "Critical risk zone gutter",
+        "defaults": { "dark": "#e06c75", "light": "#c53b45" }
+      },
+      {
+        "id": "fathom.fragile",
+        "description": "Fragile confidence zone gutter",
+        "defaults": { "dark": "#e5c07b", "light": "#b8941f" }
+      },
+      {
+        "id": "fathom.blindSpot",
+        "description": "Blind spot zone gutter",
+        "defaults": { "dark": "#61afef", "light": "#2b7cd3" }
+      },
+      {
+        "id": "fathom.healthy",
+        "description": "Healthy zone gutter",
+        "defaults": { "dark": "#98c379", "light": "#4a8f2a" }
+      }
+    ]
   },
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "package": "vsce package"
   },
+  "packageManager": "npm@10.0.0",
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
