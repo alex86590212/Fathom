@@ -22,6 +22,9 @@ class TestHonestyPattern(ABC):
     pattern_id: ClassVar[str]
     _registry: ClassVar[list[type[TestHonestyPattern]]] = []
 
+    def __init__(self, coverage_data: dict | None = None) -> None:
+        self.coverage_data = coverage_data
+
     def __init_subclass__(cls, **kwargs: object) -> None:
         super().__init_subclass__(**kwargs)
         if hasattr(cls, "pattern_id"):

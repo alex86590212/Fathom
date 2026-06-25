@@ -2,13 +2,28 @@
 
 | Phase | Timeline | Deliverable | Status |
 |-------|----------|-------------|--------|
-| 1 | Week 1–2 | Python CLI: `fathom check tests/` | 🚧 Skeleton |
-| 2 | Week 2 | GitHub Action (comment-only) | 🚧 Skeleton |
-| 3 | Week 3–4 | VS Code extension + git origin detector | 🚧 Skeleton |
-| 4 | Week 5 | Behavioral tracking + Claude hover | ⬜ Planned |
-| 5 | Week 6 | Test rewrite suggestions via Claude | ⬜ Planned |
-| 6 | Week 7–8 | Polish, demo video, launch | ⬜ Planned |
+| 1 | Week 1–2 | Python CLI: `fathom check tests/` | Done |
+| 2 | Week 2 | GitHub Action (comment-only) | Done |
+| 3 | Week 3–4 | VS Code extension + git origin detector | Done |
+| 4 | Week 5 | Behavioral tracking + Claude hover | Planned |
+| 5 | Week 6 | Test rewrite suggestions via Claude | Planned |
+| 6 | Week 7–8 | Polish, demo video, launch | Planned |
 
-## Current Focus
+## Phase 1 deliverables
 
-Phase 1 skeleton is in place. Next step: implement the four test honesty AST patterns in `packages/analyzer/fathom/test_honesty/patterns_impl.py`.
+- Unified report with per-file zones and honesty scores
+- Four AST patterns including `mocked_coverage` with `--coverage`
+- `fathom watch`, animated CLI phantom, `.fathom/last-check.json`
+- `fathom score` for single-file git-origin comprehension
+
+## Phase 2 deliverables
+
+- `fathom check --format markdown` for PR comments
+- Node 20 GitHub Action with comment upsert via `<!-- fathom-report -->`
+- `.github/workflows/fathom.yml` on demo repo tests
+
+## Phase 3 deliverables
+
+- Git origin detection via `git blame` / commit message heuristics
+- VS Code heatmap, status bar, risk matrix webview
+- `.fathom/scores.json` persistence from extension

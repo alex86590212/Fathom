@@ -15,9 +15,9 @@ Three layers, built in phases:
 
 | Phase | Package | Status |
 |-------|---------|--------|
-| 1 | `packages/analyzer` — Python CLI (`fathom check`) | 🚧 Skeleton |
-| 2 | `packages/github-action` — PR comment-only | 🚧 Skeleton |
-| 3 | `packages/vscode` — Heatmap + behavioral tracking | 🚧 Skeleton |
+| 1 | `packages/analyzer` — Python CLI (`fathom check`) | Done |
+| 2 | `packages/github-action` — PR comment-only | Done |
+| 3 | `packages/vscode` — Heatmap + git origin | Done |
 
 ## Quick Start
 

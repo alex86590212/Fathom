@@ -5,15 +5,17 @@
   "description": "GitHub Action wrapper for Fathom — comment-only PR risk reports",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "package": "ncc build src/index.ts -o dist"
+    "build": "tsc && ncc build src/index.ts -o dist --source-map --license licenses.txt",
+    "package": "npm run build"
   },
   "dependencies": {
     "@actions/core": "^1.10.0",
+    "@actions/exec": "^1.1.1",
     "@actions/github": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@vercel/ncc": "^0.38.0",
     "typescript": "^5.4.0"
   }
 }

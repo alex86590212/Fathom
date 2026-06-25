@@ -1,0 +1,23 @@
+name: Fathom
+
+on:
+  pull_request:
+    paths:
+      - 'examples/demo-repo/**'
+      - 'packages/analyzer/**'
+      - 'packages/github-action/**'
+
+jobs:
+  fathom:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: ./packages/github-action
+        with:
+          path: examples/demo-repo/tests

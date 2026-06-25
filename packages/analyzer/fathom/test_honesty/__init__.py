@@ -5,32 +5,23 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from fathom.test_honesty.analyzers import analyze_file
-from fathom.test_honesty.patterns import TestHonestyPattern
+
+def analyze_directory(
+    path: Path,
+    coverage_path: Path | None = None,
+    use_git_origin: bool = True,
+    on_progress=None,
+) -> dict[str, Any]:
+    """Walk PATH for Python test files and return a full Fathom report dict."""
+    from fathom.report import build_report
+
+    report = build_report(
+        path,
+        coverage_path=coverage_path,
+        use_git_origin=use_git_origin,
+        on_progress=on_progress,
+    )
+    return report.to_dict()
 
 
-def analyze_directory(path: Path) -> dict[str, Any]:
-    """Walk PATH for Python test files and run honesty analyzers."""
-    findings: list[dict[str, Any]] = []
-    test_files = _discover_test_files(path)
-
-    for test_file in test_files:
-        findings.extend(analyze_file(test_file))
-
-    return {
-        "path": str(path),
-        "files_scanned": len(test_files),
-        "findings": findings,
-    }
-
-
-def _discover_test_files(path: Path) -> list[Path]:
-    """Find test_*.py and *_test.py files under path."""
-    if path.is_file() and path.suffix == ".py":
-        return [path]
-
-    patterns = ("test_*.py", "*_test.py")
-    files: list[Path] = []
-    for pattern in patterns:
-        files.extend(path.rglob(pattern))
-    return sorted(set(files))
+__all__ = ["analyze_directory"]

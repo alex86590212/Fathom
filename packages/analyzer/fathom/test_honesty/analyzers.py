@@ -9,7 +9,10 @@ from typing import Any
 from fathom.test_honesty.patterns import TestHonestyPattern
 
 
-def analyze_file(file_path: Path) -> list[dict[str, Any]]:
+def analyze_file(
+    file_path: Path,
+    coverage_data: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     """Parse a Python test file and return findings for each detected pattern."""
     source = file_path.read_text(encoding="utf-8")
     try:
@@ -20,7 +23,7 @@ def analyze_file(file_path: Path) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
 
     for pattern_cls in TestHonestyPattern.registry():
-        pattern = pattern_cls()
+        pattern = pattern_cls(coverage_data=coverage_data)
         for hit in pattern.detect(tree, source):
             findings.append(
                 {
