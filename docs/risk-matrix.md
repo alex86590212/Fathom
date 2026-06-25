@@ -13,16 +13,16 @@ Every file in your codebase lives in one of those four zones. Fathom's job is to
 
 ### Comprehension (Y-axis)
 
-Inferred from behavioral proxies — we can't read minds:
+Inferred from behavioral proxies and git history shape — not commit messages (people write those themselves).
 
-| Origin | Base score |
-|--------|-----------|
-| You wrote it from scratch | 70 |
-| Heavily modified AI code (>60% changed) | 50 |
-| Lightly touched AI code (<10% changed) | 20 |
-| AI generated, you never opened it | 5 |
+| Origin | Base score | How we detect it |
+|--------|-----------|------------------|
+| You wrote it from scratch | 70 | Lines spread across many commits; no bulk single-commit drop |
+| Heavily modified AI code | 50 | Bulk intro commit still visible, but ≥35% of lines rewritten later |
+| Lightly touched AI code | 20 | Whole-file drop in one commit, only cosmetic follow-up edits |
+| AI generated, you never opened it | 5 | ≥80% of lines from one commit, ≤2 commits total, file added in one shot |
 
-Signals adjust over time: active reading time increases score; accepting AI completions without edits decreases it. Scores decay as code changes.
+Phase 4 adds local behavioral signals (reading time, AI completion acceptance) on top of these git-derived bases.
 
 ### Test Honesty (X-axis)
 

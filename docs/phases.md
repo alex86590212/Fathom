@@ -24,6 +24,6 @@
 
 ## Phase 3 deliverables
 
-- Git origin detection via `git blame` / commit message heuristics
+- Git origin detection via `git blame` structure (bulk drops, churn) — not commit messages
 - VS Code heatmap, status bar, risk matrix webview
 - `.fathom/scores.json` persistence from extension
